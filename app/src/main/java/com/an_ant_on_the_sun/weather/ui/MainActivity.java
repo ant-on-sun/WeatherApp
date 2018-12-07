@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity
         //For checking working ability
         boolean dataExistInCursor;
         cityId = Integer.parseInt(mEditTextCityName.getText().toString());
+        mTextViewDescription.setText("");
         if(mData != null && mData.getCount() > 0){
             dataExistInCursor = CursorHandler.getDataFromCursor(mData, cityId);
             if(dataExistInCursor){

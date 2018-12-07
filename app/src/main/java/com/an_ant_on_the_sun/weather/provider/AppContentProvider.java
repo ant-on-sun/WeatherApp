@@ -99,7 +99,7 @@ public class AppContentProvider extends ContentProvider{
                 // For every "?" in the selection, we need to have an element in the selection
                 // arguments that will fill in the "?". Since we have 1 question mark in the
                 // selection, we have 1 String in the selection arguments' String array.
-                selection = WeatherContract.CityEntry._ID + "=?";
+                selection = WeatherContract.CityEntry.COLUMN_CITY_ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
                 // This will perform a query on the guests table where the _id equals 3 to return a

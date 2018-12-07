@@ -60,7 +60,7 @@ public class QueryTask extends AsyncTask {
         int resultOfUpdateOrInsert = mContext.getContentResolver()
                 .update(updateOrInsertCityUri, values, null, null);
         //To show progress if needed (onProgressUpdate() will be call)
-        publishProgress();
+        //publishProgress();
         return generalRespond;
     }
 
