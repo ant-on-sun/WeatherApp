@@ -27,8 +27,8 @@ public class DataToDisplay {
     private double windSpeed;
     private double windDegree;
     private int clouds;
-    private int rain;
-    private int snow;
+    private double rain;
+    private double snow;
 
     public void setCityId(int cityId) {
         this.cityId = cityId;
@@ -98,11 +98,11 @@ public class DataToDisplay {
         this.clouds = clouds;
     }
 
-    public void setRain(int rain) {
+    public void setRain(double rain) {
         this.rain = rain;
     }
 
-    public void setSnow(int snow) {
+    public void setSnow(double snow) {
         this.snow = snow;
     }
 
@@ -175,11 +175,11 @@ public class DataToDisplay {
         return clouds;
     }
 
-    public int getRain() {
+    public double getRain() {
         return rain;
     }
 
-    public int getSnow() {
+    public double getSnow() {
         return snow;
     }
 }

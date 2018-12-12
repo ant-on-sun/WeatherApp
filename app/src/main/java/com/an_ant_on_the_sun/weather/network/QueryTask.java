@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.an_ant_on_the_sun.weather.db.DatabaseChangedReceiver;
 import com.an_ant_on_the_sun.weather.db.FillContentValuesWithData;
@@ -19,6 +20,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class QueryTask extends AsyncTask {
+    private static final String TAG = QueryTask.class.getSimpleName();
 
     private int cityId;
     private String cityName;
@@ -26,15 +28,15 @@ public class QueryTask extends AsyncTask {
     private double latitude;
     private GeneralRespond generalRespond = GeneralRespond.getsInstance();
     private Context mContext;
-    private Cursor mCursor;
+    //private Cursor mCursor;
 
-    public QueryTask(QueryParameters queryParameters, Context context, Cursor cursor) {
+    public QueryTask(QueryParameters queryParameters, Context context) {
         cityId = queryParameters.getCityId();
         cityName = queryParameters.getCityName();
         longitude = queryParameters.getLongitude();
         latitude = queryParameters.getLatitude();
         mContext = context;
-        mCursor = cursor;
+        //mCursor = cursor;
     }
 
     //Has access to UI
@@ -52,7 +54,7 @@ public class QueryTask extends AsyncTask {
             int statusCode = response.code();
             generalRespond = response.body();
         } catch (IOException e) {
-            //Log error
+            Log.e(TAG, "in doInBackground(), in try{}, Exception e: ", e);
         }
         ContentValues values = FillContentValuesWithData.uploadData(generalRespond);
         Uri updateOrInsertCityUri = Uri.withAppendedPath(WeatherContract.CityEntry.CONTENT_URI,
@@ -75,6 +77,7 @@ public class QueryTask extends AsyncTask {
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
         mContext.sendBroadcast(new Intent(DatabaseChangedReceiver.ACTION_DATABASE_CHANGED));
+        Log.i(TAG, "Data from web loaded");
     }
 
     //Has access to UI

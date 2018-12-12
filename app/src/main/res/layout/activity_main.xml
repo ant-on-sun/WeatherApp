@@ -12,15 +12,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textViewCityName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/city_name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textSize="24sp" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -46,6 +37,15 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/textViewCityName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/city_name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="24sp" />
+
+        <TextView
             android:id="@+id/textViewDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,6 +53,153 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="14sp"
             tools:text="Some description" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imageViewIcon01d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon01d" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon01n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon01n" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon02d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon02d" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon02n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon02n" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon03d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon03d" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon03n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon03n" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon04d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon04d" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon04n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon04n" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon09d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon09d" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon09n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon09n" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon10d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon10d" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon10n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon10n" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon11d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon11d" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon11n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon11n" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon13d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon13d" />
+                <ImageView
+                    android:id="@+id/imageViewIcon13n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon13n" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon50d"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon50d" />
+
+                <ImageView
+                    android:id="@+id/imageViewIcon50n"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/icon50n" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/textViewTemperature"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="24sp"
+                tools:text="Current temperature in city" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/textViewInfoAboutDisabling"

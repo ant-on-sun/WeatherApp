@@ -7,25 +7,25 @@ public class Rain {
 
     @SerializedName("3h") //Rain volume for the last 3 hours
     @Expose
-    private Integer _3h;
+    private Double _3h;
 
     @SerializedName("1h") //Rain volume for the last 1 hour
     @Expose
-    private Integer _1h;
+    private Double _1h;
 
-    public Integer get3h() {
+    public Double get3h() {
         return _3h;
     }
 
-    public void set3h(Integer _3h) {
+    public void set3h(Double _3h) {
         this._3h = _3h;
     }
 
-    public Integer get1h() {
+    public Double get1h() {
         return _1h;
     }
 
-    public void set1h(Integer _1h) {
+    public void set1h(Double _1h) {
         this._1h = _1h;
     }
 }

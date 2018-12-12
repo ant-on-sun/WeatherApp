@@ -76,8 +76,8 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
                 + WeatherContract.CityEntry.COLUMN_WIND_SPEED + " REAL, "
                 + WeatherContract.CityEntry.COLUMN_WIND_DEGREE + " REAL, "
                 + WeatherContract.CityEntry.COLUMN_CLOUDS + " INTEGER, "
-                + WeatherContract.CityEntry.COLUMN_RAIN + " INTEGER, "
-                + WeatherContract.CityEntry.COLUMN_SNOW + " INTEGER"
+                + WeatherContract.CityEntry.COLUMN_RAIN + " REAL, "
+                + WeatherContract.CityEntry.COLUMN_SNOW + " REAL"
                 + ");";
         //Creating the table
         db.execSQL(SQL_CREATE_WEATHER_IN_CITIES_TABLE);

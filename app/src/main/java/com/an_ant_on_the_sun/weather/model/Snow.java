@@ -7,25 +7,25 @@ public class Snow {
 
     @SerializedName("1h") //Snow volume for the last 1 hour
     @Expose
-    private Integer _1h;
+    private Double _1h;
 
     @SerializedName("3h") //Snow volume for the last 3 hours
     @Expose
-    private Integer _3h;
+    private Double _3h;
 
-    public Integer get_1h() {
+    public Double get_1h() {
         return _1h;
     }
 
-    public Integer get_3h() {
+    public Double get_3h() {
         return _3h;
     }
 
-    public void set_1h(Integer _1h) {
+    public void set_1h(Double _1h) {
         this._1h = _1h;
     }
 
-    public void set_3h(Integer _3h) {
+    public void set_3h(Double _3h) {
         this._3h = _3h;
     }
 }

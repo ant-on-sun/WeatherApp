@@ -23,12 +23,8 @@ public class DisableButtonTask extends AsyncTask {
     private MainActivity mainActivity;
     private Button mButtonSearch;
     private TextView mTextViewInfoAboutDisabling;
-    private Calendar calendar = Calendar.getInstance();
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss",
-            Locale.getDefault());
-    Date startTime;
-    String startTimeString;
-    //private CountDownTimer countDownTimer = null;
+//    private Calendar calendar = Calendar.getInstance();
+//    Date startTime;
 
     public DisableButtonTask(MainActivity mainActivity,
                              Button buttonSearch,
@@ -41,28 +37,15 @@ public class DisableButtonTask extends AsyncTask {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        //mButtonSearch.setVisibility(View.INVISIBLE);
+
         mButtonSearch.setEnabled(false);
-        startTime = calendar.getTime();
+        Log.i(TAG, "Starting disabling button Search");
+        //startTime = calendar.getTime();
 
     }
 
     @Override
     protected Object doInBackground(Object[] objects) {
-
-//        countDownTimer = new CountDownTimer(10 * 60 * 1000, 1000) {
-//            @Override
-//            public void onTick(long millisUntilFinished) {
-//                String timeLeft = " " + millisUntilFinished / 1000;
-//                publishProgress(timeLeft);
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//
-//            }
-//        };
-//        countDownTimer.start();
 
         Integer[] timeInterval = new Integer[2];
         for (int minutes = 9; minutes >= 0; minutes--){
@@ -101,10 +84,7 @@ public class DisableButtonTask extends AsyncTask {
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
-        //mButtonSearch.setVisibility(View.VISIBLE);
-//        if(countDownTimer != null){
-//            countDownTimer.cancel();
-//        }
+
         mButtonSearch.setEnabled(true);
         mTextViewInfoAboutDisabling.setText("");
     }

@@ -13,7 +13,7 @@ public class Main {
     @SerializedName("pressure") //Atmospheric pressure
     // (on the sea level, if there is no sea_level or grnd_level data), hPa
     @Expose
-    private Integer pressure;
+    private Double pressure;
 
     @SerializedName("humidity") //Humidity, %
     @Expose
@@ -49,11 +49,11 @@ public class Main {
         this.temp = temp;
     }
 
-    public Integer getPressure() {
+    public Double getPressure() {
         return pressure;
     }
 
-    public void setPressure(Integer pressure) {
+    public void setPressure(Double pressure) {
         this.pressure = pressure;
     }
 

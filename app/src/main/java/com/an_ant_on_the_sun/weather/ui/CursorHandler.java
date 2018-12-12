@@ -1,11 +1,15 @@
 package com.an_ant_on_the_sun.weather.ui;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import com.an_ant_on_the_sun.weather.db.WeatherContract;
 import com.an_ant_on_the_sun.weather.model.DataToDisplay;
 
 public class CursorHandler {
+    private static final String TAG = CursorHandler.class.getSimpleName();
+
+    //private static boolean dataExistInCursor;
 
     public static boolean getDataFromCursor(Cursor mData, int cityId){
         boolean dataExistInCursor = false;
@@ -32,35 +36,45 @@ public class CursorHandler {
         int columnIndexClouds = mData.getColumnIndex(WeatherContract.CityEntry.COLUMN_CLOUDS);
         int columnIndexRain = mData.getColumnIndex(WeatherContract.CityEntry.COLUMN_RAIN);
         int columnIndexSnow = mData.getColumnIndex(WeatherContract.CityEntry.COLUMN_SNOW);
-        try{
-            while (mData.moveToNext()){
-                //Ищем по CityId
-                if(mData.getInt(columnIndexCityId) == cityId){
-                    dataToDisplay.setCityId(mData.getInt(columnIndexCityId));
-                    dataToDisplay.setCityName(mData.getString(columnIndexCityName));
-                    dataToDisplay.setLongitude(mData.getDouble(columnIndexLon));
-                    dataToDisplay.setLatitude(mData.getDouble(columnIndexLat));
-                    dataToDisplay.setCountry(mData.getString(columnIndexCountry));
-                    dataToDisplay.setSunrise(mData.getInt(columnIndexSunrise));
-                    dataToDisplay.setSunset(mData.getInt(columnIndexSunset));
-                    dataToDisplay.setDescription(mData.getString(columnIndexDescription));
-                    dataToDisplay.setIcon(mData.getString(columnIndexIcon));
-                    dataToDisplay.setTemperature(mData.getDouble(columnIndexTemp));
-                    dataToDisplay.setHumidity(mData.getInt(columnIndexHumidity));
-                    dataToDisplay.setPressure(mData.getDouble(columnIndexPressure));
-                    dataToDisplay.setTempMin(mData.getDouble(columnIndexTempMin));
-                    dataToDisplay.setTempMax(mData.getDouble(columnIndexTempMax));
-                    dataToDisplay.setWindSpeed(mData.getDouble(columnIndexWindSpeed));
-                    dataToDisplay.setWindDegree(mData.getDouble(columnIndexWindDegree));
-                    dataToDisplay.setClouds(mData.getInt(columnIndexClouds));
-                    dataToDisplay.setRain(mData.getInt(columnIndexRain));
-                    dataToDisplay.setSnow(mData.getInt(columnIndexSnow));
-                    dataExistInCursor = true;
-                }
+
+        while (mData.moveToNext()) {
+            //Ищем по CityId
+            if (mData.getInt(columnIndexCityId) == cityId) {
+                dataToDisplay.setCityId(mData.getInt(columnIndexCityId));
+                dataToDisplay.setCityName(mData.getString(columnIndexCityName));
+                dataToDisplay.setLongitude(mData.getDouble(columnIndexLon));
+                dataToDisplay.setLatitude(mData.getDouble(columnIndexLat));
+                dataToDisplay.setCountry(mData.getString(columnIndexCountry));
+                dataToDisplay.setSunrise(mData.getInt(columnIndexSunrise));
+                dataToDisplay.setSunset(mData.getInt(columnIndexSunset));
+                dataToDisplay.setDescription(mData.getString(columnIndexDescription));
+                dataToDisplay.setIcon(mData.getString(columnIndexIcon));
+                dataToDisplay.setTemperature(mData.getDouble(columnIndexTemp));
+                dataToDisplay.setHumidity(mData.getInt(columnIndexHumidity));
+                dataToDisplay.setPressure(mData.getDouble(columnIndexPressure));
+                dataToDisplay.setTempMin(mData.getDouble(columnIndexTempMin));
+                dataToDisplay.setTempMax(mData.getDouble(columnIndexTempMax));
+                dataToDisplay.setWindSpeed(mData.getDouble(columnIndexWindSpeed));
+                dataToDisplay.setWindDegree(mData.getDouble(columnIndexWindDegree));
+                dataToDisplay.setClouds(mData.getInt(columnIndexClouds));
+                dataToDisplay.setRain(mData.getDouble(columnIndexRain));
+                dataToDisplay.setSnow(mData.getDouble(columnIndexSnow));
+                dataExistInCursor = true;
+                Log.i(TAG, "getDataFromCursor(), inside WHILE dataExistInCursor = "
+                        + dataExistInCursor);
             }
-        } finally {
-            mData.close();
         }
+                mData.close();
+
+//        try{
+//
+//
+//
+//        } finally {
+//
+//        }
+        Log.i(TAG, "getDataFromCursor(), after WHILE dataExistInCursor = "
+                + dataExistInCursor);
         return dataExistInCursor;
     }
 }
