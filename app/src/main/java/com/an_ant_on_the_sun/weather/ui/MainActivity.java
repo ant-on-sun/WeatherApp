@@ -1,10 +1,12 @@
 package com.an_ant_on_the_sun.weather.ui;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,10 +20,11 @@ import android.widget.TextView;
 import com.an_ant_on_the_sun.weather.R;
 import com.an_ant_on_the_sun.weather.db.DatabaseChangedReceiver;
 import com.an_ant_on_the_sun.weather.db.WeatherContract;
+import com.an_ant_on_the_sun.weather.filepreferences.WriteDataToFileReceiver;
 import com.an_ant_on_the_sun.weather.model.DataToDisplay;
+import com.an_ant_on_the_sun.weather.filepreferences.FileNameForPreferences;
 import com.an_ant_on_the_sun.weather.model.IconId;
 import com.an_ant_on_the_sun.weather.model.QueryParameters;
-import com.an_ant_on_the_sun.weather.network.QueryTask;
 import com.an_ant_on_the_sun.weather.network.RequestDataFromWebReceiver;
 import com.facebook.stetho.Stetho;
 
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity
     private DatabaseChangedReceiver mReceiverDatabaseChanged;
     private RequestDataFromWebReceiver mReceiverDataFromWeb;
     private DisableButtonReceiver mReceiverDisableButton;
+    private WriteDataToFileReceiver mReceiverWriteToFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,11 +137,17 @@ public class MainActivity extends AppCompatActivity
 
         mLoader = getLoaderManager().initLoader(CITIES_LOADER, null, this);
         mReceiverDatabaseChanged = new DatabaseChangedReceiver(this);
-        mReceiverDataFromWeb = new RequestDataFromWebReceiver();
+        mReceiverDataFromWeb = new RequestDataFromWebReceiver(mButtonSearch);
         mReceiverDisableButton = new DisableButtonReceiver(this,
                 mButtonSearch, mTextViewInfoAboutDisabling);
+        mReceiverWriteToFile = new WriteDataToFileReceiver();
         mTextViewCityName.setText("");
         hideAllIcons();
+        //Starting service for regular data update
+        Intent intentService = new Intent(this, RegularDataUpdateService.class);
+
+        readDataFromFile();
+        startService(intentService);
     }
 
     @Override
@@ -145,14 +155,21 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         //Создаем и регистрируем приемники широковещательных сообщений для получения сообщений
-        //об обновлении базы данных и необходимости загрузки данных из сети
+        //об обновлении базы данных, необходимости загрузки данных из сети и записи данных в файл
         IntentFilter intentFilterDatabaseChanged = new IntentFilter(DatabaseChangedReceiver
                 .ACTION_DATABASE_CHANGED);
         IntentFilter intentFilterNeedDataFromWeb = new IntentFilter(RequestDataFromWebReceiver
                 .ACTION_NEED_DATA_FROM_WEB);
+        IntentFilter intentFilterWriteDataToFile = new IntentFilter(WriteDataToFileReceiver
+                .ACTION_WRITE_DATA_TO_FILE);
         registerReceiver(mReceiverDatabaseChanged, intentFilterDatabaseChanged);
         registerReceiver(mReceiverDataFromWeb, intentFilterNeedDataFromWeb);
         registerReceiver(mReceiverDisableButton, intentFilterNeedDataFromWeb);
+        registerReceiver(mReceiverWriteToFile, intentFilterWriteDataToFile);
+        //Грузим данные последнего запроса пользователя из предыдущего сеанса работы с приложением
+        if(cityId != 0){
+            mLoader.forceLoad();
+        }
     }
 
     @Override
@@ -162,6 +179,7 @@ public class MainActivity extends AppCompatActivity
         unregisterReceiver(mReceiverDatabaseChanged);
         unregisterReceiver(mReceiverDataFromWeb);
         unregisterReceiver(mReceiverDisableButton);
+        unregisterReceiver(mReceiverWriteToFile);
     }
 
     @Override
@@ -217,12 +235,16 @@ public class MainActivity extends AppCompatActivity
 
     public void onButtonSearchClick(View view){
         //For checking working ability
-        cityId = Integer.parseInt(mEditTextCityName.getText().toString());
+        try {
+            cityId = Integer.parseInt(mEditTextCityName.getText().toString());
+        } catch (NumberFormatException e) {
+            Log.i(TAG, "Can't parse int from user input, Exception: ", e);
+        }
+
         if(cityId == 0){
             return;
         }
         mTextViewDescription.setText("");
-
         mLoader.forceLoad();
     }
 
@@ -313,6 +335,7 @@ public class MainActivity extends AppCompatActivity
 
     public void updateDataOnScreen(){
         mLoader.forceLoad();
+        writeDataToFile();
     }
 
     private void checkDataInCursor(){
@@ -334,13 +357,22 @@ public class MainActivity extends AppCompatActivity
                 .ACTION_NEED_DATA_FROM_WEB);
         intentNeedDataFromWeb.putExtra("cityId", cityId);
         sendBroadcast(intentNeedDataFromWeb);
-        //disableSearchButton();
     }
 
-//    private void disableSearchButton(){
-//        DisableButtonTask disableButtonTask = new DisableButtonTask(this,
-//                mButtonSearch, mTextViewInfoAboutDisabling);
-//        disableButtonTask.execute();
-//    }
+    private void writeDataToFile(){
+        Intent intentWriteDataToFile = new Intent(WriteDataToFileReceiver
+                .ACTION_WRITE_DATA_TO_FILE);
+        intentWriteDataToFile.putExtra("cityId", cityId);
+        sendBroadcast(intentWriteDataToFile);
+    }
+
+    private void readDataFromFile(){
+        SharedPreferences sharedPreferences = getSharedPreferences(FileNameForPreferences.FILE_NAME,
+                Context.MODE_PRIVATE);
+        if(sharedPreferences.contains(FileNameForPreferences.FILE_CITY_ID)){
+            cityId = sharedPreferences.getInt(FileNameForPreferences.FILE_CITY_ID, 0);
+            Log.i(TAG, "Read data from file, cityId = " + cityId);
+        }
+    }
 
 }

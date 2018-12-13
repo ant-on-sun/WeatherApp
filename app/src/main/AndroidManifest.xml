@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.an_ant_on_the_sun.weather">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -18,20 +18,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
         <provider
-            android:authorities="com.an_ant_on_the_sun.weather"
             android:name=".provider.AppContentProvider"
-            android:exported="false"/>
+            android:authorities="com.an_ant_on_the_sun.weather"
+            android:exported="false" />
 
-        <!--<receiver
-            android:name=".db.DatabaseChangedReceiver"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="com.an_ant_on_the_sun.weather.DATABASE_CHANGED"></action>
-            </intent-filter>
-        </receiver>-->
-
+        <service
+            android:name=".ui.RegularDataUpdateService"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>

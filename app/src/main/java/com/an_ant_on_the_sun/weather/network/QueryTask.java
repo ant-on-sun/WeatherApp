@@ -28,7 +28,6 @@ public class QueryTask extends AsyncTask {
     private double latitude;
     private GeneralRespond generalRespond = GeneralRespond.getsInstance();
     private Context mContext;
-    //private Cursor mCursor;
 
     public QueryTask(QueryParameters queryParameters, Context context) {
         cityId = queryParameters.getCityId();
@@ -36,7 +35,6 @@ public class QueryTask extends AsyncTask {
         longitude = queryParameters.getLongitude();
         latitude = queryParameters.getLatitude();
         mContext = context;
-        //mCursor = cursor;
     }
 
     //Has access to UI
@@ -76,7 +74,9 @@ public class QueryTask extends AsyncTask {
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
-        mContext.sendBroadcast(new Intent(DatabaseChangedReceiver.ACTION_DATABASE_CHANGED));
+        Intent intentDatabaseChanged = new Intent(DatabaseChangedReceiver.ACTION_DATABASE_CHANGED);
+        intentDatabaseChanged.putExtra("cityId", cityId);
+        mContext.sendBroadcast(intentDatabaseChanged);
         Log.i(TAG, "Data from web loaded");
     }
 
