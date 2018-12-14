@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.an_ant_on_the_sun.weather.db.DatabaseChangedReceiver;
@@ -41,6 +42,7 @@ public class QueryTask extends AsyncTask {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        Log.i(TAG, "Start query for web");
     }
 
     //Does not have access to UI
@@ -50,7 +52,11 @@ public class QueryTask extends AsyncTask {
         try {
             Response<GeneralRespond> response = call.execute();
             int statusCode = response.code();
+            Log.i(TAG, "response status code is " + statusCode);
             generalRespond = response.body();
+            if(generalRespond == null){
+                Log.e(TAG, "response body (generalRespond) is null");
+            }
         } catch (IOException e) {
             Log.e(TAG, "in doInBackground(), in try{}, Exception e: ", e);
         }
@@ -74,9 +80,10 @@ public class QueryTask extends AsyncTask {
     @Override
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
+
         Intent intentDatabaseChanged = new Intent(DatabaseChangedReceiver.ACTION_DATABASE_CHANGED);
         intentDatabaseChanged.putExtra("cityId", cityId);
-        mContext.sendBroadcast(intentDatabaseChanged);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intentDatabaseChanged);
         Log.i(TAG, "Data from web loaded");
     }
 
@@ -86,5 +93,6 @@ public class QueryTask extends AsyncTask {
         super.onCancelled();
         mContext = null;
         generalRespond = null;
+        Log.i(TAG, "Query task was cancelled");
     }
 }

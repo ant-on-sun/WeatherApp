@@ -26,7 +26,7 @@ public class WriteToFileTask extends AsyncTask {
         editor.putInt(FileNameForPreferences.FILE_CITY_ID, cityId);
         editor.apply();
         Log.i(TAG, "Data (cityId) has been written to a file "
-                + FileNameForPreferences.FILE_NAME);
+                + FileNameForPreferences.FILE_NAME + ", cityId = " + cityId);
         return null;
     }
 }

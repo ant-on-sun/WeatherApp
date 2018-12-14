@@ -6,7 +6,7 @@
     <string name="search">Search</string>
     <string name="info_about_disabling">
         The cite allows to make a call only once in 10 minutes.\n
-        Please wait for %1$s : %2$s
+        Please wait for %1$s
     </string>
     <string name="current_temperature">%1$s ℃</string>
 </resources>

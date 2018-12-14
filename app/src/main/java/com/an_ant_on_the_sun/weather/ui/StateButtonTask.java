@@ -1,46 +1,30 @@
 package com.an_ant_on_the_sun.weather.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.CountDownTimer;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
-import com.an_ant_on_the_sun.weather.R;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class DisableButtonTask extends AsyncTask {
-    private static final String TAG = DisableButtonTask.class.getSimpleName();
+public class StateButtonTask extends AsyncTask {
+    private static final String TAG = StateButtonTask.class.getSimpleName();
 
-    //private Context mContext;
-    private MainActivity mainActivity;
-    private Button mButtonSearch;
-    private TextView mTextViewInfoAboutDisabling;
-//    private Calendar calendar = Calendar.getInstance();
-//    Date startTime;
+      private Context mAppContext;
 
-    public DisableButtonTask(MainActivity mainActivity,
-                             Button buttonSearch,
-                             TextView textViewInfoAboutDisabling){
-        this.mainActivity = mainActivity;
-        mButtonSearch = buttonSearch;
-        mTextViewInfoAboutDisabling = textViewInfoAboutDisabling;
+    public StateButtonTask(Context context){
+        mAppContext = context;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
 
-        mButtonSearch.setEnabled(false);
+        Intent intentDisableButton = new Intent(DisableButtonReceiver.ACTION_DISABLE_BUTTON);
+        LocalBroadcastManager.getInstance(mAppContext).sendBroadcast(intentDisableButton);
         Log.i(TAG, "Starting disabling button Search");
-        //startTime = calendar.getTime();
+
 
     }
 
@@ -75,9 +59,10 @@ public class DisableButtonTask extends AsyncTask {
         } else {
             seconds = "" + resultArray[1];
         }
-        String infoAboutDisabling = mainActivity.getResources()
-                .getString(R.string.info_about_disabling, minutes, seconds);
-        mTextViewInfoAboutDisabling.setText(infoAboutDisabling);
+        String timeLeft = minutes + ":" + seconds;
+        Intent intentSetTextInfo = new Intent(ChangeTextInfoReceiver.ACTION_CHANGE_TEXT);
+        intentSetTextInfo.putExtra("text", timeLeft);
+        LocalBroadcastManager.getInstance(mAppContext).sendBroadcast(intentSetTextInfo);
         //Log.i(TAG, "Time left " + minutes + " : " + seconds);
     }
 
@@ -85,7 +70,11 @@ public class DisableButtonTask extends AsyncTask {
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
 
-        mButtonSearch.setEnabled(true);
-        mTextViewInfoAboutDisabling.setText("");
+        Intent intentEnableButton = new Intent(EnableButtonReceiver.ACTION_ENABLE_BUTTON);
+        LocalBroadcastManager.getInstance(mAppContext).sendBroadcast(intentEnableButton);
+
+        Intent intentSetTextInfo = new Intent(ChangeTextInfoReceiver.ACTION_CHANGE_TEXT);
+        intentSetTextInfo.putExtra("text", "");
+        LocalBroadcastManager.getInstance(mAppContext).sendBroadcast(intentSetTextInfo);
     }
 }

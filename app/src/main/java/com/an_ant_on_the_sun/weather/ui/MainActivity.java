@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,6 +38,9 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private static final String KEY_BUTTON_IS_ENABLED = "BUTTON_IS_ENABLED";
+    public static final String KEY_CITY_ID = "CITY_ID";
+
     /**
      * Идентификатор для загрузчика
      */
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity
     private String mInfoMessage;
     private List<ImageView> listOfImageViewIcons = new ArrayList<>();
     private boolean dataExistInCursor;
+    private boolean mButtonIsEnabled;
+    private LocalBroadcastManager localBroadcastManager;
 
     private TextView mTextViewCityName;
     private EditText mEditTextCityName;
@@ -79,7 +85,10 @@ public class MainActivity extends AppCompatActivity
 
     private DatabaseChangedReceiver mReceiverDatabaseChanged;
     private RequestDataFromWebReceiver mReceiverDataFromWeb;
+    private StateButtonReceiver mReceiverStateButton;
+    private EnableButtonReceiver mReceiverEnableButton;
     private DisableButtonReceiver mReceiverDisableButton;
+    private ChangeTextInfoReceiver mReceiverChangeTextInfo;
     private WriteDataToFileReceiver mReceiverWriteToFile;
 
     @Override
@@ -135,19 +144,30 @@ public class MainActivity extends AppCompatActivity
                 )
         );
 
+        if(savedInstanceState != null){
+            mButtonIsEnabled = savedInstanceState
+                    .getBoolean(KEY_BUTTON_IS_ENABLED, true);
+            mButtonSearch.setEnabled(mButtonIsEnabled);
+            cityId = savedInstanceState.getInt(KEY_CITY_ID, 0);
+        } else {
+            cityId = readDataFromFile();
+        }
+
         mLoader = getLoaderManager().initLoader(CITIES_LOADER, null, this);
         mReceiverDatabaseChanged = new DatabaseChangedReceiver(this);
         mReceiverDataFromWeb = new RequestDataFromWebReceiver(mButtonSearch);
-        mReceiverDisableButton = new DisableButtonReceiver(this,
-                mButtonSearch, mTextViewInfoAboutDisabling);
+        mReceiverStateButton = new StateButtonReceiver(mButtonSearch);
+        mReceiverEnableButton = new EnableButtonReceiver(mButtonSearch);
+        mReceiverDisableButton = new DisableButtonReceiver(mButtonSearch);
+        mReceiverChangeTextInfo = new ChangeTextInfoReceiver(mTextViewInfoAboutDisabling);
         mReceiverWriteToFile = new WriteDataToFileReceiver();
         mTextViewCityName.setText("");
         hideAllIcons();
         //Starting service for regular data update
         Intent intentService = new Intent(this, RegularDataUpdateService.class);
-
-        readDataFromFile();
         startService(intentService);
+
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
 
     @Override
@@ -160,12 +180,24 @@ public class MainActivity extends AppCompatActivity
                 .ACTION_DATABASE_CHANGED);
         IntentFilter intentFilterNeedDataFromWeb = new IntentFilter(RequestDataFromWebReceiver
                 .ACTION_NEED_DATA_FROM_WEB);
+        IntentFilter intentFilterEnableButton = new IntentFilter(EnableButtonReceiver
+                .ACTION_ENABLE_BUTTON);
+        IntentFilter intentFilterDisableButton = new IntentFilter(DisableButtonReceiver
+                .ACTION_DISABLE_BUTTON);
+        IntentFilter intentFilterChangeTextInfo = new IntentFilter(ChangeTextInfoReceiver
+                .ACTION_CHANGE_TEXT);
         IntentFilter intentFilterWriteDataToFile = new IntentFilter(WriteDataToFileReceiver
                 .ACTION_WRITE_DATA_TO_FILE);
-        registerReceiver(mReceiverDatabaseChanged, intentFilterDatabaseChanged);
-        registerReceiver(mReceiverDataFromWeb, intentFilterNeedDataFromWeb);
-        registerReceiver(mReceiverDisableButton, intentFilterNeedDataFromWeb);
-        registerReceiver(mReceiverWriteToFile, intentFilterWriteDataToFile);
+
+        localBroadcastManager.registerReceiver(mReceiverDatabaseChanged,
+                intentFilterDatabaseChanged);
+        localBroadcastManager.registerReceiver(mReceiverDataFromWeb, intentFilterNeedDataFromWeb);
+        localBroadcastManager.registerReceiver(mReceiverStateButton, intentFilterNeedDataFromWeb);
+        localBroadcastManager.registerReceiver(mReceiverEnableButton, intentFilterEnableButton);
+        localBroadcastManager.registerReceiver(mReceiverDisableButton, intentFilterDisableButton);
+        localBroadcastManager.registerReceiver(mReceiverChangeTextInfo, intentFilterChangeTextInfo);
+        localBroadcastManager.registerReceiver(mReceiverWriteToFile, intentFilterWriteDataToFile);
+
         //Грузим данные последнего запроса пользователя из предыдущего сеанса работы с приложением
         if(cityId != 0){
             mLoader.forceLoad();
@@ -176,15 +208,26 @@ public class MainActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
 
-        unregisterReceiver(mReceiverDatabaseChanged);
-        unregisterReceiver(mReceiverDataFromWeb);
-        unregisterReceiver(mReceiverDisableButton);
-        unregisterReceiver(mReceiverWriteToFile);
+        localBroadcastManager.unregisterReceiver(mReceiverDatabaseChanged);
+        localBroadcastManager.unregisterReceiver(mReceiverDataFromWeb);
+        localBroadcastManager.unregisterReceiver(mReceiverStateButton);
+        localBroadcastManager.unregisterReceiver(mReceiverEnableButton);
+        localBroadcastManager.unregisterReceiver(mReceiverDisableButton);
+        localBroadcastManager.unregisterReceiver(mReceiverChangeTextInfo);
+        localBroadcastManager.unregisterReceiver(mReceiverWriteToFile);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(KEY_BUTTON_IS_ENABLED, mButtonSearch.isEnabled());
+        outState.putInt(KEY_CITY_ID, cityId);
     }
 
     @Override
@@ -256,6 +299,7 @@ public class MainActivity extends AppCompatActivity
         mTextViewCurrentTemperature.setText(getResources()
                 .getString(R.string.current_temperature,
                         String.valueOf(dataToDisplay.getTemperature())));
+        writeDataToFile();
 
     }
 
@@ -335,7 +379,6 @@ public class MainActivity extends AppCompatActivity
 
     public void updateDataOnScreen(){
         mLoader.forceLoad();
-        writeDataToFile();
     }
 
     private void checkDataInCursor(){
@@ -356,23 +399,30 @@ public class MainActivity extends AppCompatActivity
         Intent intentNeedDataFromWeb = new Intent(RequestDataFromWebReceiver
                 .ACTION_NEED_DATA_FROM_WEB);
         intentNeedDataFromWeb.putExtra("cityId", cityId);
-        sendBroadcast(intentNeedDataFromWeb);
+        localBroadcastManager.sendBroadcast(intentNeedDataFromWeb);
     }
 
     private void writeDataToFile(){
+        int cityIdFromFile = readDataFromFile();
+        if(cityIdFromFile == cityId){
+            return;
+        }
         Intent intentWriteDataToFile = new Intent(WriteDataToFileReceiver
                 .ACTION_WRITE_DATA_TO_FILE);
         intentWriteDataToFile.putExtra("cityId", cityId);
-        sendBroadcast(intentWriteDataToFile);
+        localBroadcastManager.sendBroadcast(intentWriteDataToFile);
     }
 
-    private void readDataFromFile(){
+    private int readDataFromFile(){
+        int cityIdFromFile = 0;
         SharedPreferences sharedPreferences = getSharedPreferences(FileNameForPreferences.FILE_NAME,
                 Context.MODE_PRIVATE);
         if(sharedPreferences.contains(FileNameForPreferences.FILE_CITY_ID)){
-            cityId = sharedPreferences.getInt(FileNameForPreferences.FILE_CITY_ID, 0);
-            Log.i(TAG, "Read data from file, cityId = " + cityId);
+            cityIdFromFile = sharedPreferences.getInt(FileNameForPreferences.FILE_CITY_ID,
+                    0);
+            Log.i(TAG, "Read data from file, cityId = " + cityIdFromFile);
         }
+        return cityIdFromFile;
     }
 
 }
