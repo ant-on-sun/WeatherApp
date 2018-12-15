@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Button;
 
@@ -53,7 +54,7 @@ public class RegularDataUpdateService extends IntentService {
                 Intent intentNeedDataFromWeb = new Intent(RequestDataFromWebReceiver
                         .ACTION_NEED_DATA_FROM_WEB);
                 intentNeedDataFromWeb.putExtra("cityId", cityId);
-                sendBroadcast(intentNeedDataFromWeb);
+                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intentNeedDataFromWeb);
                 Log.i(TAG, "Call for web data from service");
             } catch (Exception e){
                 Log.e(TAG, "onHandleIntent() in while() catch Exception: ", e);

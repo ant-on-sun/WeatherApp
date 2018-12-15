@@ -56,6 +56,7 @@ public class AppContentProvider extends ContentProvider{
         // "content://com.example.android.guests/guests" (without a number at the end) doesn't match.
         sUriMatcher.addURI(WeatherContract.CONTENT_AUTHORITY,
                 WeatherContract.PATH_WEATHER_IN_CITIES + "/#", CITY_ID);
+        Log.i(TAG, "in static{} block");
     }
 
     /**
@@ -66,6 +67,7 @@ public class AppContentProvider extends ContentProvider{
     @Override
     public boolean onCreate() {
         mDbHelper = WeatherDbHelper.getInstance(getContext());
+        Log.i(TAG, "in onCreate(), getting WeatherDbHelper.getInstance");
         return true;
     }
 
@@ -78,6 +80,7 @@ public class AppContentProvider extends ContentProvider{
                         @Nullable String sortOrder) {
         //Let's get access to the database for reading
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
+        Log.i(TAG, "Has got access to DB for reading");
         //Cursor containing the result of the query
         Cursor cursor;
         // Figure out if the URI matcher can match the URI to a specific code
@@ -113,7 +116,7 @@ public class AppContentProvider extends ContentProvider{
         try {
             cursor.setNotificationUri(getContext().getContentResolver(), uri);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "in query() after switch in try{} Exception: ", e);
         }
         return cursor;
     }

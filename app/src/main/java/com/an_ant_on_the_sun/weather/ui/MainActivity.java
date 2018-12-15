@@ -21,7 +21,6 @@ import android.widget.TextView;
 import com.an_ant_on_the_sun.weather.R;
 import com.an_ant_on_the_sun.weather.db.DatabaseChangedReceiver;
 import com.an_ant_on_the_sun.weather.db.WeatherContract;
-import com.an_ant_on_the_sun.weather.filepreferences.WriteDataToFileReceiver;
 import com.an_ant_on_the_sun.weather.model.DataToDisplay;
 import com.an_ant_on_the_sun.weather.filepreferences.FileNameForPreferences;
 import com.an_ant_on_the_sun.weather.model.IconId;
@@ -89,7 +88,6 @@ public class MainActivity extends AppCompatActivity
     private EnableButtonReceiver mReceiverEnableButton;
     private DisableButtonReceiver mReceiverDisableButton;
     private ChangeTextInfoReceiver mReceiverChangeTextInfo;
-    private WriteDataToFileReceiver mReceiverWriteToFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,7 +158,7 @@ public class MainActivity extends AppCompatActivity
         mReceiverEnableButton = new EnableButtonReceiver(mButtonSearch);
         mReceiverDisableButton = new DisableButtonReceiver(mButtonSearch);
         mReceiverChangeTextInfo = new ChangeTextInfoReceiver(mTextViewInfoAboutDisabling);
-        mReceiverWriteToFile = new WriteDataToFileReceiver();
+
         mTextViewCityName.setText("");
         hideAllIcons();
         //Starting service for regular data update
@@ -186,8 +184,6 @@ public class MainActivity extends AppCompatActivity
                 .ACTION_DISABLE_BUTTON);
         IntentFilter intentFilterChangeTextInfo = new IntentFilter(ChangeTextInfoReceiver
                 .ACTION_CHANGE_TEXT);
-        IntentFilter intentFilterWriteDataToFile = new IntentFilter(WriteDataToFileReceiver
-                .ACTION_WRITE_DATA_TO_FILE);
 
         localBroadcastManager.registerReceiver(mReceiverDatabaseChanged,
                 intentFilterDatabaseChanged);
@@ -196,7 +192,6 @@ public class MainActivity extends AppCompatActivity
         localBroadcastManager.registerReceiver(mReceiverEnableButton, intentFilterEnableButton);
         localBroadcastManager.registerReceiver(mReceiverDisableButton, intentFilterDisableButton);
         localBroadcastManager.registerReceiver(mReceiverChangeTextInfo, intentFilterChangeTextInfo);
-        localBroadcastManager.registerReceiver(mReceiverWriteToFile, intentFilterWriteDataToFile);
 
         //Грузим данные последнего запроса пользователя из предыдущего сеанса работы с приложением
         if(cityId != 0){
@@ -214,7 +209,6 @@ public class MainActivity extends AppCompatActivity
         localBroadcastManager.unregisterReceiver(mReceiverEnableButton);
         localBroadcastManager.unregisterReceiver(mReceiverDisableButton);
         localBroadcastManager.unregisterReceiver(mReceiverChangeTextInfo);
-        localBroadcastManager.unregisterReceiver(mReceiverWriteToFile);
     }
 
     @Override
@@ -256,6 +250,8 @@ public class MainActivity extends AppCompatActivity
                 WeatherContract.CityEntry.COLUMN_RAIN,
                 WeatherContract.CityEntry.COLUMN_SNOW};
 
+        Log.i(TAG, "in onCreateLoader()");
+
         // Загрузчик запускает запрос ContentProvider в фоновом потоке
         return new CursorLoader(this,
                 WeatherContract.CityEntry.CONTENT_URI,   // URI контент-провайдера для запроса
@@ -269,11 +265,13 @@ public class MainActivity extends AppCompatActivity
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mData = data;
         checkDataInCursor();
+        Log.i(TAG, "in onLoadFinished()");
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mLoader = null;
+        Log.i(TAG, "in onLoaderReset()");
     }
 
     public void onButtonSearchClick(View view){
@@ -393,6 +391,9 @@ public class MainActivity extends AppCompatActivity
                 getDataFromWeb();
             }
         }
+        if(mData != null && mData.getCount() == 0 && cityId > 0){
+            getDataFromWeb();
+        }
     }
 
     private void getDataFromWeb(){
@@ -404,13 +405,16 @@ public class MainActivity extends AppCompatActivity
 
     private void writeDataToFile(){
         int cityIdFromFile = readDataFromFile();
-        if(cityIdFromFile == cityId){
+        if(cityIdFromFile == cityId || cityId == 0){
             return;
         }
-        Intent intentWriteDataToFile = new Intent(WriteDataToFileReceiver
-                .ACTION_WRITE_DATA_TO_FILE);
-        intentWriteDataToFile.putExtra("cityId", cityId);
-        localBroadcastManager.sendBroadcast(intentWriteDataToFile);
+        SharedPreferences sharedPreferences = getSharedPreferences(FileNameForPreferences.FILE_NAME,
+                Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(FileNameForPreferences.FILE_CITY_ID, cityId);
+        editor.apply();
+        Log.i(TAG, "Data (cityId) has been written from Main Thread to a file "
+                + FileNameForPreferences.FILE_NAME + ", cityId = " + cityId);
     }
 
     private int readDataFromFile(){

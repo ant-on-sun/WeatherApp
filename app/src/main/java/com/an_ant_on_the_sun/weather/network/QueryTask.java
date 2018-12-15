@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.an_ant_on_the_sun.weather.db.DatabaseChangedReceiver;
 import com.an_ant_on_the_sun.weather.db.FillContentValuesWithData;
@@ -49,6 +50,7 @@ public class QueryTask extends AsyncTask {
     @Override
     protected Object doInBackground(Object[] objects) {
         Call<GeneralRespond> call = ApiFactory.getWeatherService().getWeatherByCityId(cityId);
+        Boolean successful = true;
         try {
             Response<GeneralRespond> response = call.execute();
             int statusCode = response.code();
@@ -58,16 +60,25 @@ public class QueryTask extends AsyncTask {
                 Log.e(TAG, "response body (generalRespond) is null");
             }
         } catch (IOException e) {
-            Log.e(TAG, "in doInBackground(), in try{}, Exception e: ", e);
+            Log.e(TAG, "in doInBackground(), in call to web try{}, Exception e: ", e);
+            successful = false;
+            return successful;
         }
-        ContentValues values = FillContentValuesWithData.uploadData(generalRespond);
-        Uri updateOrInsertCityUri = Uri.withAppendedPath(WeatherContract.CityEntry.CONTENT_URI,
-                String.valueOf(generalRespond.getId()));
-        int resultOfUpdateOrInsert = mContext.getContentResolver()
-                .update(updateOrInsertCityUri, values, null, null);
+        try {
+            ContentValues values = FillContentValuesWithData.uploadData(generalRespond);
+            Uri updateOrInsertCityUri = Uri.withAppendedPath(WeatherContract.CityEntry.CONTENT_URI,
+                    String.valueOf(generalRespond.getId()));
+            int resultOfUpdateOrInsert = mContext.getContentResolver()
+                    .update(updateOrInsertCityUri, values, null, null);
+        } catch (Exception e) {
+            Log.e(TAG, "in doInBackground(), in DB update try{}, Exception e: ", e);
+            successful = false;
+            return successful;
+        }
         //To show progress if needed (onProgressUpdate() will be call)
         //publishProgress();
-        return generalRespond;
+        //return generalRespond;
+        return successful;
     }
 
     //Has access to UI
@@ -81,6 +92,13 @@ public class QueryTask extends AsyncTask {
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
 
+        Boolean successful = (Boolean)o;
+        if(!successful){
+            //Show error message
+            Toast.makeText(mContext, "Something goes wrong. Can't get data from web",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
         Intent intentDatabaseChanged = new Intent(DatabaseChangedReceiver.ACTION_DATABASE_CHANGED);
         intentDatabaseChanged.putExtra("cityId", cityId);
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(intentDatabaseChanged);
