@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <map>
+        <entry key="Moscow">5601538</entry>
+        <entry key="Volgograd">472757</entry>
+        <entry key="Voronezh">689025</entry>
+        <entry key="Tambov">484646</entry>
+        <entry key="Rostov">501183</entry>
+        <entry key="Krasnoyarsk">1502026</entry>
+        <entry key="Khabarovsk">2022890</entry>
+        <entry key="Vladikavkaz">473249</entry>
+        <entry key="Vyborg">470546</entry>
+        <entry key="Urengoy">1488414</entry>
+        <entry key="Murmansk">524305</entry>
+        <entry key="Makhachkala">532096</entry>
+        <entry key="Lipetsk">535121</entry>
+        <entry key="Izhevsk">554840</entry>
+        <entry key="Sterlitamak">487495</entry>
+        <entry key="Cherepovets">569223</entry>
+        <entry key="Zhigulevsk">463082</entry>
+        <entry key="Syzran">484972</entry>
+        <entry key="Baykal">2026986</entry>
+        <entry key="Kazan">551487</entry>
+        <entry key="Astrakhan">580497</entry>
+        <entry key="New York">5128581</entry>
+        <entry key="Washington">5815135</entry>
+        <entry key="London">2643743</entry>
+        <entry key="Paris">2968815</entry>
+        <entry key="Berlin">2950159</entry>
+        <entry key="Beijing">1816670</entry>
+        <entry key="Tashkent">1512569</entry>
+    </map>
+

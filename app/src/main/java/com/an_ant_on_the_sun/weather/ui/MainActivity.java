@@ -13,10 +13,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.an_ant_on_the_sun.weather.R;
 import com.an_ant_on_the_sun.weather.db.DatabaseChangedReceiver;
@@ -30,7 +32,9 @@ import com.facebook.stetho.Stetho;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>{
@@ -38,7 +42,9 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String KEY_BUTTON_IS_ENABLED = "BUTTON_IS_ENABLED";
-    public static final String KEY_CITY_ID = "CITY_ID";
+    private static final String KEY_CITY_ID = "CITY_ID";
+    private static final String KEY_MAP_CITY_NAMES_ID = "MAP_CITY_NAMES_ID";
+    private static final String KEY_LIST_OF_CITY_NAMES = "LIST_OF_CITY_NAMES";
 
     /**
      * Идентификатор для загрузчика
@@ -56,9 +62,11 @@ public class MainActivity extends AppCompatActivity
     private boolean dataExistInCursor;
     private boolean mButtonIsEnabled;
     private LocalBroadcastManager localBroadcastManager;
+    private HashMap<String, Integer> cityNameIdMap;
+    private List<String> listOfCityNames = new ArrayList<>();
 
     private TextView mTextViewCityName;
-    private EditText mEditTextCityName;
+    private AutoCompleteTextView mAutoCompleteTextViewCityName;
     private Button mButtonSearch;
     private TextView mTextViewDescription;
     private ImageView mImageViewIcon01d;
@@ -96,7 +104,7 @@ public class MainActivity extends AppCompatActivity
         Stetho.initializeWithDefaults(this);
 
         mTextViewCityName = findViewById(R.id.textViewCityName);
-        mEditTextCityName = findViewById(R.id.editTextCityName);
+        mAutoCompleteTextViewCityName = findViewById(R.id.autoCompleteTextViewCityName);
         mButtonSearch = findViewById(R.id.buttonSearch);
         mTextViewDescription = findViewById(R.id.textViewDescription);
         mImageViewIcon01d = findViewById(R.id.imageViewIcon01d);
@@ -147,8 +155,19 @@ public class MainActivity extends AppCompatActivity
                     .getBoolean(KEY_BUTTON_IS_ENABLED, true);
             mButtonSearch.setEnabled(mButtonIsEnabled);
             cityId = savedInstanceState.getInt(KEY_CITY_ID, 0);
+            try {
+                cityNameIdMap = (HashMap<String, Integer>) savedInstanceState
+                        .getSerializable(KEY_MAP_CITY_NAMES_ID);
+            } catch (Exception e) {
+                Log.e(TAG, "in try when getting HashMap<String, Integer> " +
+                        "from Serializable, Exception: ", e);
+            }
+            listOfCityNames = savedInstanceState.getStringArrayList(KEY_LIST_OF_CITY_NAMES);
         } else {
             cityId = readDataFromFile();
+            cityNameIdMap = XmlMapParser
+                    .getHashMapFromXmlResource(this, R.xml.map_cityname_id);
+            listOfCityNames = getListOfCityNames(cityNameIdMap);
         }
 
         mLoader = getLoaderManager().initLoader(CITIES_LOADER, null, this);
@@ -160,6 +179,8 @@ public class MainActivity extends AppCompatActivity
         mReceiverChangeTextInfo = new ChangeTextInfoReceiver(mTextViewInfoAboutDisabling);
 
         mTextViewCityName.setText("");
+        mAutoCompleteTextViewCityName.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, listOfCityNames));
         hideAllIcons();
         //Starting service for regular data update
         Intent intentService = new Intent(this, RegularDataUpdateService.class);
@@ -222,6 +243,8 @@ public class MainActivity extends AppCompatActivity
 
         outState.putBoolean(KEY_BUTTON_IS_ENABLED, mButtonSearch.isEnabled());
         outState.putInt(KEY_CITY_ID, cityId);
+        outState.putSerializable(KEY_MAP_CITY_NAMES_ID, cityNameIdMap);
+        outState.putStringArrayList(KEY_LIST_OF_CITY_NAMES, (ArrayList<String>) listOfCityNames);
     }
 
     @Override
@@ -275,14 +298,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onButtonSearchClick(View view){
-        //For checking working ability
-        try {
-            cityId = Integer.parseInt(mEditTextCityName.getText().toString());
-        } catch (NumberFormatException e) {
-            Log.i(TAG, "Can't parse int from user input, Exception: ", e);
-        }
+        cityName = mAutoCompleteTextViewCityName.getText().toString();
+        cityId = getCityIdFromMap(cityName);
+//        try {
+//            cityId = Integer.parseInt();
+//        } catch (NumberFormatException e) {
+//            Log.i(TAG, "Can't parse int from user input, Exception: ", e);
+//        }
 
         if(cityId == 0){
+            //Show error message
+            Toast.makeText(this, "Sorry, I don't know that city. Try another one.",
+                    Toast.LENGTH_LONG).show();
             return;
         }
         mTextViewDescription.setText("");
@@ -427,6 +454,27 @@ public class MainActivity extends AppCompatActivity
             Log.i(TAG, "Read data from file, cityId = " + cityIdFromFile);
         }
         return cityIdFromFile;
+    }
+
+    private ArrayList<String> getListOfCityNames(HashMap<String, Integer> cityNameIdMap){
+        if(cityNameIdMap == null){
+            Log.e(TAG, "cityNameIdMap is null");
+            return null;
+        }
+        List<String> listOfCityNames = new ArrayList<>();
+        for(Map.Entry<String, Integer> entry: cityNameIdMap.entrySet()){
+            listOfCityNames.add(entry.getKey());
+        }
+        return (ArrayList<String>) listOfCityNames;
+    }
+
+    private int getCityIdFromMap(String cityName){
+        for(Map.Entry<String, Integer> entry: cityNameIdMap.entrySet()){
+            if(entry.getKey().equalsIgnoreCase(cityName)){
+                return entry.getValue();
+            }
+        }
+        return 0;
     }
 
 }
