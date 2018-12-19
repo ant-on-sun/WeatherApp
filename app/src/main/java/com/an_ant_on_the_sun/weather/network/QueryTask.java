@@ -72,7 +72,7 @@ public class QueryTask extends AsyncTask {
             ContentValues values = FillContentValuesWithData.uploadData(generalRespond);
             Uri updateOrInsertCityUri = Uri.withAppendedPath(WeatherContract.CityEntry.CONTENT_URI,
                     String.valueOf(generalRespond.getId()));
-            int resultOfUpdateOrInsert = mContext.getContentResolver()
+            mContext.getContentResolver()
                     .update(updateOrInsertCityUri, values, null, null);
         } catch (Exception e) {
             Log.e(TAG, "in doInBackground(), in DB update try{}, Exception e: ", e);

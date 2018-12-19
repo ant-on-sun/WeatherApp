@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity
         localBroadcastManager.registerReceiver(mReceiverChangeTextInfo, intentFilterChangeTextInfo);
 
         //Грузим данные последнего запроса пользователя из предыдущего сеанса работы с приложением
-        if(cityId != 0){
+        if(cityId != 0 && cityIdExistsInMap(cityId)){
             mLoader.forceLoad();
         }
     }
@@ -470,6 +470,18 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return 0;
+    }
+
+    //Check that cityId exists in the map
+    private boolean cityIdExistsInMap(int cityId){
+        for(Map.Entry<String, Integer> entry: cityNameIdMap.entrySet()){
+            if(entry.getValue() == cityId){
+                Log.i(TAG, "cityId exists in the map");
+                return true;
+            }
+        }
+        Log.e(TAG, "cityId doesn't exist in the map");
+        return false;
     }
 
 }
