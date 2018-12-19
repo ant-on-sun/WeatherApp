@@ -4,12 +4,9 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.util.Log;
 
-import com.an_ant_on_the_sun.weather.R;
-
 import org.xmlpull.v1.XmlPullParser;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class XmlMapParser {
     private static final String TAG = XmlMapParser.class.getSimpleName();

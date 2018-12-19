@@ -60,6 +60,10 @@ public class StateButtonTask extends AsyncTask {
             seconds = "" + resultArray[1];
         }
         String timeLeft = minutes + ":" + seconds;
+
+        Intent intentDisableButton = new Intent(DisableButtonReceiver.ACTION_DISABLE_BUTTON);
+        LocalBroadcastManager.getInstance(mAppContext).sendBroadcast(intentDisableButton);
+
         Intent intentSetTextInfo = new Intent(ChangeTextInfoReceiver.ACTION_CHANGE_TEXT);
         intentSetTextInfo.putExtra("text", timeLeft);
         LocalBroadcastManager.getInstance(mAppContext).sendBroadcast(intentSetTextInfo);

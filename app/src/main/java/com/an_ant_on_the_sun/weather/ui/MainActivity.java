@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity
     private String cityName;
     private Cursor mData;
     private Loader<Cursor> mLoader;
-    private String mInfoMessage;
     private List<ImageView> listOfImageViewIcons = new ArrayList<>();
     private boolean dataExistInCursor;
     private boolean mButtonIsEnabled;
@@ -181,6 +180,8 @@ public class MainActivity extends AppCompatActivity
         mTextViewCityName.setText("");
         mAutoCompleteTextViewCityName.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, listOfCityNames));
+        //кол-во символов, после введения которых будут предложены варианты автозаполнения
+        mAutoCompleteTextViewCityName.setThreshold(1);
         hideAllIcons();
         //Starting service for regular data update
         Intent intentService = new Intent(this, RegularDataUpdateService.class);
@@ -300,12 +301,6 @@ public class MainActivity extends AppCompatActivity
     public void onButtonSearchClick(View view){
         cityName = mAutoCompleteTextViewCityName.getText().toString();
         cityId = getCityIdFromMap(cityName);
-//        try {
-//            cityId = Integer.parseInt();
-//        } catch (NumberFormatException e) {
-//            Log.i(TAG, "Can't parse int from user input, Exception: ", e);
-//        }
-
         if(cityId == 0){
             //Show error message
             Toast.makeText(this, "Sorry, I don't know that city. Try another one.",

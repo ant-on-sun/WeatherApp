@@ -3,7 +3,6 @@ package com.an_ant_on_the_sun.weather.network;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
@@ -50,9 +49,14 @@ public class QueryTask extends AsyncTask {
     @Override
     protected Object doInBackground(Object[] objects) {
         Call<GeneralRespond> call = ApiFactory.getWeatherService().getWeatherByCityId(cityId);
-        Boolean successful = true;
+        int resultCode = 0;
+        if(!CheckInternetAccess.isOnline()){
+            resultCode = 1;
+            return resultCode;
+        }
         try {
             Response<GeneralRespond> response = call.execute();
+            Log.i(TAG, "Have made a call.execute()");
             int statusCode = response.code();
             Log.i(TAG, "response status code is " + statusCode);
             generalRespond = response.body();
@@ -61,8 +65,8 @@ public class QueryTask extends AsyncTask {
             }
         } catch (IOException e) {
             Log.e(TAG, "in doInBackground(), in call to web try{}, Exception e: ", e);
-            successful = false;
-            return successful;
+            resultCode = 2;
+            return resultCode;
         }
         try {
             ContentValues values = FillContentValuesWithData.uploadData(generalRespond);
@@ -72,13 +76,13 @@ public class QueryTask extends AsyncTask {
                     .update(updateOrInsertCityUri, values, null, null);
         } catch (Exception e) {
             Log.e(TAG, "in doInBackground(), in DB update try{}, Exception e: ", e);
-            successful = false;
-            return successful;
+            resultCode = 3;
+            return resultCode;
         }
         //To show progress if needed (onProgressUpdate() will be call)
         //publishProgress();
         //return generalRespond;
-        return successful;
+        return resultCode;
     }
 
     //Has access to UI
@@ -92,11 +96,27 @@ public class QueryTask extends AsyncTask {
     protected void onPostExecute(Object o) {
         super.onPostExecute(o);
 
-        Boolean successful = (Boolean)o;
-        if(!successful){
+        Integer resultCode = (Integer)o;
+        if(resultCode > 0){
             //Show error message
-            Toast.makeText(mContext, "Something goes wrong. Can't get data from web",
-                    Toast.LENGTH_LONG).show();
+            switch (resultCode){
+                case 1:
+                    Toast.makeText(mContext, "Can't get internet connection",
+                            Toast.LENGTH_LONG).show();
+                    break;
+                case 2:
+                    Toast.makeText(mContext, "Something goes wrong. Can't get data from web",
+                            Toast.LENGTH_LONG).show();
+                    break;
+                case 3:
+                    Toast.makeText(mContext, "Something goes wrong. " +
+                                    "Can't write data to database",
+                            Toast.LENGTH_LONG).show();
+                    break;
+                default:
+                    Toast.makeText(mContext, "Something goes wrong. Have no idea why...",
+                            Toast.LENGTH_LONG).show();
+            }
             return;
         }
         Intent intentDatabaseChanged = new Intent(DatabaseChangedReceiver.ACTION_DATABASE_CHANGED);
@@ -113,4 +133,5 @@ public class QueryTask extends AsyncTask {
         generalRespond = null;
         Log.i(TAG, "Query task was cancelled");
     }
+
 }
